@@ -1,167 +1,92 @@
 # Projeto de Geração Automática de Libras com IA
+## Grupo 3 — Tradução para Libras e Geração de Avatar
 
-## Visão Geral
-
-Este projeto é desenvolvido no contexto da Residência Tecnológica **GrowUp**, do Porto Digital, em parceria com a Globo (Rio de Janeiro).
-
-O objetivo é criar um sistema capaz de gerar automaticamente traduções em Libras a partir de vídeos, utilizando técnicas de inteligência artificial.
-
-A solução é estruturada como um pipeline de processamento que integra extração de áudio, transcrição com marcação temporal, conversão para Libras e exibição com avatar, permitindo a disponibilização de conteúdos acessíveis em escala.
+### Visão Geral
+Este módulo faz parte do projeto desenvolvido na Residência Tecnológica GrowUp, com o objetivo de criar um sistema capaz de gerar traduções automáticas em Libras a partir de vídeos. O Grupo 3 é responsável por transformar o texto transcrito em representações em Libras e exibi-las por meio de um avatar animado, atuando como ponte entre a linguagem natural (português) e a linguagem visual (Libras).
 
 ---
 
-## Organização do Projeto (Trello)
-
-O gerenciamento das atividades é realizado por meio de um quadro no Trello, estruturado para refletir o fluxo de desenvolvimento e facilitar a colaboração entre as equipes.
-
-### Estrutura do Quadro
-
-O fluxo de tarefas é organizado nas seguintes etapas:
-
-- **Backlog Geral**  
-  Lista de todas as tarefas do projeto, incluindo funcionalidades futuras e melhorias.
-
-- **Sprint Atual**  
-  Tarefas selecionadas para desenvolvimento no ciclo atual.
-
-- **Em andamento**  
-  Atividades em desenvolvimento.
-
-- **Em revisão**  
-  Código finalizado aguardando validação técnica.
-
-- **Testes**  
-  Validação funcional e verificação de integração entre componentes.
-
-- **Integração**  
-  Tarefas que envolvem comunicação entre diferentes equipes ou módulos.
-
-- **Concluído**  
-  Atividades finalizadas e validadas.
-
-- **Bloqueado**  
-  Tarefas impedidas por dependências externas ou problemas técnicos.
+### Responsabilidades do Grupo 3
+* Converter texto (com timestamps) em estrutura compatível com Libras.
+* Aplicar regras linguísticas e adaptações necessárias (evitar tradução literal).
+* Integrar APIs ou modelos de tradução para Libras.
+* Gerar animações com avatar em sincronia com o tempo do vídeo.
+* Garantir qualidade visual e semântica da tradução.
 
 ---
 
-## Identificação das Equipes
+### Organização no Trello
+O fluxo de desenvolvimento é organizado através das seguintes colunas de tarefas:
 
-As tarefas são classificadas por equipe utilizando labels:
-
-- **Grupo 1 — Processamento de Áudio e Vídeo**  
-  Responsável pela extração, limpeza e segmentação do áudio.
-
-- **Grupo 2 — Transcrição e Temporização de Fala**  
-  Responsável pela conversão de áudio em texto e geração de timestamps.
-
-- **Grupo 3 — Tradução para Libras e Geração de Avatar**  
-  Responsável pela conversão do texto para Libras e integração com sistemas de avatar.
-
-- **Grupo 4 — Interface e Exibição do Vídeo**  
-  Responsável pela interface do usuário, reprodução do vídeo e exibição do avatar.
-
-- **Integração**  
-  Utilizado para tarefas que envolvem mais de uma equipe.
+| Coluna | Descrição |
+| :--- | :--- |
+| Backlog | Funcionalidades, melhorias e pesquisas. |
+| Em andamento | Atividades em desenvolvimento técnico. |
+| Em revisão | Código aguardando validação de pares. |
+| Concluído | Tarefas finalizadas e validadas. |
+| Integração | Comunicação entre Grupo 2 (entrada) e Grupo 4 (exibição). |
+| links importnates | Salvar links importantes para o desenvolvimento |
 
 ---
 
-## Estrutura das Tarefas
+### Estrutura das Tarefas
 
-Cada tarefa no Trello segue um padrão definido para garantir clareza e rastreabilidade.
+#### Padrão de Título
+Todas as tarefas devem seguir o formato:  
+`[G3] Nome da tarefa`
 
-# Estrutura de Tarefas (Trello)
+#### Descrição da Tarefa
+Cada tarefa deve conter:
+1. **Objetivo claro**
+2. **Contexto** (quando necessário)
+3. **Dependências** (ex: dados do Grupo 2 ou integração com Grupo 4)
 
-Este documento define o padrão de criação e organização das tarefas no Trello, garantindo clareza, rastreabilidade e padronização entre as equipes.
-
----
-
-## Padrão de Título
-
-Todas as tarefas devem seguir o formato:
-
-[G#] Nome da tarefa
-
-Exemplos:
-[G1] Extrair áudio do vídeo  
-[G2] Gerar timestamps da transcrição  
-[G3] Integrar API de tradução para Libras  
-[G4] Implementar player de vídeo  
+#### Checklist Padrão
+- [ ] Receber texto com timestamps
+- [ ] Processar tradução para Libras
+- [ ] Adaptar estrutura gramatical
+- [ ] Integrar com sistema de avatar
+- [ ] Validar sincronização
+- [ ] Testar resultado final
 
 ---
 
-## Descrição da Tarefa
-
-A descrição deve conter informações claras e objetivas:
-
-- Objetivo da tarefa  
-- Contexto (quando necessário)  
-- Dependências (ex: outra equipe ou tarefa)  
-
----
-
-## Checklist
-
-Cada tarefa deve possuir um checklist com as etapas necessárias para sua conclusão.
-
-Exemplo:
-
-- [ ] Receber dados de entrada  
-- [ ] Processar informação  
-- [ ] Validar resultado  
-- [ ] Testar funcionamento  
+### Critérios de Conclusão
+Uma tarefa só pode ser marcada como concluída quando apresentar:
+* Checklist totalmente finalizado.
+* Tradução validada (sem erros semânticos graves).
+* Avatar executando corretamente.
+* Sincronização com timestamps funcional.
+* Testes realizados com sucesso.
+* Integrações validadas.
 
 ---
 
-## Responsável
+### Boas Práticas
+> **Nota linguística:** Evitar tradução literal — respeitar sempre a estrutura da Libras.
 
-Toda tarefa deve ter pelo menos um responsável definido.
-
----
-
-## Labels
-
-As tarefas devem ser identificadas com labels de acordo com a equipe:
-
-- Grupo 1 — Processamento de Áudio e Vídeo  
-- Grupo 2 — Transcrição e Temporização de Fala  
-- Grupo 3 — Tradução para Libras e Geração de Avatar  
-- Grupo 4 — Interface e Exibição do Vídeo  
-- Integração — tarefas que envolvem mais de uma equipe  
+* Testar sempre com diferentes tipos de frases.
+* Manter consistência nas animações do avatar.
+* Dividir tarefas grandes (ex: separar tradução de animação).
+* Documentar decisões linguísticas importantes.
+* Alinhar frequentemente com Grupo 2 e Grupo 4.
 
 ---
 
-## Critérios de Conclusão
+### Integrações e Metodologia
 
-Uma tarefa só pode ser movida para "Concluído" quando:
+**Dependências de Fluxo:**
+1. **Grupo 2:** Fornece texto e timestamps.
+2. **Grupo 3:** Realiza a tradução e gera a animação.
+3. **Grupo 4:** Consome o avatar renderizado para exibição.
 
-- Todas as etapas do checklist forem finalizadas  
-- O código estiver revisado (quando aplicável)  
-- Testes forem realizados com sucesso  
-- Integrações necessárias estiverem validadas  
-
----
-
-## Boas Práticas
-
-- Dividir tarefas grandes em tarefas menores  
-- Evitar descrições vagas  
-- Atualizar o status da tarefa constantemente  
-- Registrar bloqueios quando existirem  
-- Garantir alinhamento com outras equipes quando necessário  
+**Metodologia Scrum:**
+* **Planning:** Definição das tarefas da sprint.
+* **Daily:** Acompanhamento do progresso.
+* **Review:** Validação das entregas.
+* **Retrospectiva:** Melhoria contínua do processo.
 
 ---
 
-## Metodologia
-
-O projeto adota uma abordagem baseada em Scrum, com os seguintes ritos:
-
-- **Planning:** definição das tarefas da sprint  
-- **Daily:** acompanhamento do progresso  
-- **Review:** apresentação das entregas  
-- **Retrospectiva:** identificação de melhorias no processo  
-
----
-
-## Objetivo
-
-Estabelecer uma organização clara e eficiente para o desenvolvimento de um sistema distribuído entre múltiplas equipes, garantindo qualidade, integração e evolução contínua da solução.
+### Objetivo Final
+Desenvolver uma solução eficiente e escalável para tradução automática em Libras, garantindo fidelidade linguística, clareza visual, sincronização temporal e facilidade de integração.

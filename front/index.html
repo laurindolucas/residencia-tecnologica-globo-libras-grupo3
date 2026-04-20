@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>VLibras Teste</title>
+</head>
+<body>
+
+  <textarea id="glossa" placeholder="Digite a glosa aqui ex: MARIA COMPRAR LIVRO"></textarea>
+  <br>
+  <button id="btn">▶</button>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+    document.getElementById('btn').addEventListener('click', function() {
+      const glossa = document.getElementById('glossa').value;
+
+      if (!window.plugin) {
+        document.querySelector('[vw-access-button]').click();
+      }
+
+      const interval = setInterval(() => {
+        if (window.plugin && window.plugin.player) {
+          clearInterval(interval);
+          window.plugin.player.translate(glossa);
+        }
+      }, 300);
+    });
+  </script>
+
+</body>
+</html>

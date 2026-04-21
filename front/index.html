@@ -2,40 +2,439 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>VLibras Teste</title>
+  <title>Conversor Glossa em Libras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+ 
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+ 
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+ 
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+ 
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+ 
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #0066cc;
+      color: white;
+      transition: background-color 0.3s;
+    }
+ 
+    button:hover {
+      background-color: #0052a3;
+    }
+ 
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+ 
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+ 
+    .timeline {
+      margin-top: 20px;
+    }
+ 
+    .timeline-item {
+      padding: 10px;
+      margin: 5px 0;
+      background-color: #f9f9f9;
+      border-left: 4px solid #0066cc;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+ 
+    .timeline-item:hover {
+      background-color: #f0f0f0;
+    }
+ 
+    .timeline-item.active {
+      background-color: #e6f2ff;
+      border-left-color: #ff6600;
+      font-weight: bold;
+    }
+ 
+    .timestamp {
+      font-size: 12px;
+      color: #666;
+    }
+ 
+    .glossa-text {
+      font-size: 18px;
+      color: #0066cc;
+      margin: 5px 0;
+    }
+ 
+    .original-text {
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
+    }
+ 
+    .info-panel {
+      background-color: #e6f2ff;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+ 
+    .player-info {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+ 
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-
-  <textarea id="glossa" placeholder="Digite a glosa aqui ex: MARIA COMPRAR LIVRO"></textarea>
-  <br>
-  <button id="btn">▶</button>
-
-  <div vw class="enabled">
-    <div vw-access-button class="active"></div>
-    <div vw-plugin-wrapper>
-      <div class="vw-plugin-top-wrapper"></div>
+  <h1>🎬 Conversor de Glossas em Libras</h1>
+ 
+  <div class="container">
+    <!-- Painel de Controle -->
+    <div class="panel">
+      <h2>📋 Controles</h2>
+ 
+      <div class="controls">
+        <input type="file" id="fileInput" accept=".srt,.txt,.json">
+      </div>
+ 
+      <div class="controls">
+        <button id="btnLoad">📁 Carregar</button>
+        <button id="btnPlay">▶ Reproduzir</button>
+        <button id="btnPause">⏸ Pausar</button>
+        <button id="btnStop">⏹ Parar</button>
+      </div>
+ 
+      <div class="info-panel">
+        <strong>Total de gestos:</strong> <span id="totalGestos">0</span><br>
+        <strong>Gesto atual:</strong> <span id="gestoAtual">0</span>
+      </div>
+ 
+      <div class="player-info">
+        <strong>Status:</strong> <span id="status">Aguardando arquivo...</span><br>
+        <strong>Tempo:</strong> <span id="currentTime">00:00:00</span> / <span id="totalTime">00:00:00</span>
+      </div>
+    </div>
+ 
+    <!-- Avatar VLibras -->
+    <div class="panel">
+      <h2>👤 Avatar em Libras</h2>
+      <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
+        </div>
+      </div>
     </div>
   </div>
-
+ 
+  <!-- Timeline de Gestos -->
+  <div class="panel" style="margin-top: 20px;">
+    <h2>⏱ Timeline de Gestos</h2>
+    <div id="timeline" class="timeline"></div>
+  </div>
+ 
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');
+ 
+    let glossas = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let isPaused = false;
+    let startTime = 0;
+    let pausedTime = 0;
+    let playerInterval = null;
+    let playTimeout = null;
+ 
+    function timeToSeconds(timeStr) {
+      const normalized = timeStr.replace(',', '.');
+      const parts = normalized.split(':');
+      const hours = parseInt(parts[0]);
+      const minutes = parseInt(parts[1]);
+      const seconds = parseFloat(parts[2]);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+ 
+    function secondsToTime(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+ 
+    function getGlossaDuration(glossa) {
+      const words = glossa.trim().split(/\s+/).length;
+      return words * 2500 + 1200;
+    }
+ 
+    function renderTimeline() {
+      const timeline = document.getElementById('timeline');
+      timeline.innerHTML = '';
+ 
+      glossas.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.innerHTML = `
+          <div class="timestamp">${item.start} → ${item.end}</div>
+          <div class="glossa-text">${item.glossa}</div>
+          <div class="original-text">"${item.original}"</div>
+        `;
+        div.addEventListener('click', () => jumpTo(index));
+        timeline.appendChild(div);
+      });
+ 
+      updateUI();
+    }
+ 
+    function updateUI() {
+      document.getElementById('totalGestos').textContent = glossas.length;
+      document.getElementById('gestoAtual').textContent = currentIndex + 1;
+ 
+      if (glossas.length > 0) {
+        document.getElementById('totalTime').textContent = glossas[glossas.length - 1].end;
+      }
+ 
+      document.querySelectorAll('.timeline-item').forEach((item, index) => {
+        item.classList.toggle('active', index === currentIndex);
+      });
+ 
+      const activeItem = document.querySelector('.timeline-item.active');
+      if (activeItem) {
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+ 
+    function parseSRT(text) {
+      const blocks = text.trim().split(/\n\s*\n/);
+      return blocks.map(block => {
+        const lines = block.trim().split('\n');
+        if (lines.length < 3) return null;
 
-    document.getElementById('btn').addEventListener('click', function() {
-      const glossa = document.getElementById('glossa').value;
+        const index = parseInt(lines[0]);
+        const times = lines[1].split(' --> ');
+        const start = times[0].trim();
+        const end = times[1].trim();
+        const original = lines.slice(2).join(' ').trim();
 
+        return { index, start, end, original, glossa: original };
+      }).filter(Boolean);
+    }
+
+    function loadJSON() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) { alert('Selecione um arquivo'); return; }
+
+      document.getElementById('status').textContent = 'Processando com IA...';
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const ext = file.name.split('.').pop().toLowerCase();
+
+          if (ext === 'json') {
+            glossas = JSON.parse(e.target.result);
+            currentIndex = 0;
+            isPlaying = false;
+            isPaused = false;
+            document.getElementById('status').textContent = 'Arquivo carregado ✅';
+            renderTimeline();
+            return;
+          }
+
+          // SRT/TXT — manda pro servidor Python
+          const response = await fetch('http://localhost:5000/processar', {
+            method: 'POST',
+            body: e.target.result
+          });
+
+          glossas = await response.json();
+          currentIndex = 0;
+          isPlaying = false;
+          isPaused = false;
+          document.getElementById('status').textContent = 'Processado ✅';
+          renderTimeline();
+        } catch (err) {
+          alert('Erro: ' + err.message);
+          document.getElementById('status').textContent = 'Erro ❌';
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    function initVLibras() {
       if (!window.plugin) {
         document.querySelector('[vw-access-button]').click();
       }
-
-      const interval = setInterval(() => {
-        if (window.plugin && window.plugin.player) {
-          clearInterval(interval);
-          window.plugin.player.translate(glossa);
+    }
+ 
+    function playGlossa(glossa) {
+      if (!window.plugin || !window.plugin.player) {
+        initVLibras();
+        setTimeout(() => playGlossa(glossa), 300);
+        return;
+      }
+ 
+      window.plugin.player.translate(glossa);
+    }
+ 
+    function playSequence() {
+      if (!isPlaying || isPaused) return;
+      if (currentIndex >= glossas.length) {
+        stop();
+        return;
+      }
+ 
+      const item = glossas[currentIndex];
+      document.getElementById('status').textContent = `Reproduzindo: ${item.glossa}`;
+      playGlossa(item.glossa);
+ 
+      updateUI();
+      currentIndex++;
+ 
+      const delay = getGlossaDuration(item.glossa);
+ 
+      playTimeout = setTimeout(() => {
+        if (isPlaying && !isPaused) {
+          playSequence();
         }
-      }, 300);
-    });
+      }, delay);
+    }
+ 
+    function play() {
+      if (glossas.length === 0) {
+        alert('Carregue um arquivo primeiro');
+        return;
+      }
+ 
+      if (currentIndex >= glossas.length) {
+        currentIndex = 0;
+      }
+ 
+      isPlaying = true;
+      isPaused = false;
+      startTime = Date.now() - pausedTime;
+ 
+      document.getElementById('btnPlay').disabled = true;
+      document.getElementById('btnPause').disabled = false;
+      document.getElementById('status').textContent = 'Reproduzindo... ▶';
+ 
+      playSequence();
+ 
+      playerInterval = setInterval(() => {
+        if (isPlaying && !isPaused) {
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          document.getElementById('currentTime').textContent = secondsToTime(elapsed);
+        }
+      }, 100);
+    }
+ 
+    function pause() {
+      isPlaying = false;
+      isPaused = true;
+      pausedTime = Date.now() - startTime;
+ 
+      if (playTimeout) {
+        clearTimeout(playTimeout);
+        playTimeout = null;
+      }
+ 
+      document.getElementById('btnPlay').disabled = false;
+      document.getElementById('btnPause').disabled = true;
+      document.getElementById('status').textContent = 'Pausado ⏸';
+    }
+ 
+    function stop() {
+      isPlaying = false;
+      isPaused = false;
+      currentIndex = 0;
+      pausedTime = 0;
+ 
+      clearInterval(playerInterval);
+      if (playTimeout) {
+        clearTimeout(playTimeout);
+        playTimeout = null;
+      }
+ 
+      document.getElementById('btnPlay').disabled = false;
+      document.getElementById('btnPause').disabled = true;
+      document.getElementById('currentTime').textContent = '00:00:00';
+      document.getElementById('status').textContent = 'Parado ⏹';
+      updateUI();
+    }
+ 
+    function jumpTo(index) {
+      currentIndex = index;
+ 
+      if (playTimeout) {
+        clearTimeout(playTimeout);
+        playTimeout = null;
+      }
+ 
+      updateUI();
+ 
+      if (isPlaying) {
+        const item = glossas[index];
+        document.getElementById('status').textContent = `Pulando para: ${item.glossa}`;
+        playGlossa(item.glossa);
+        currentIndex++;
+ 
+        const delay = getGlossaDuration(item.glossa);
+        playTimeout = setTimeout(() => {
+          if (isPlaying && !isPaused) playSequence();
+        }, delay);
+      }
+    }
+ 
+    document.getElementById('btnLoad').addEventListener('click', loadJSON);
+    document.getElementById('btnPlay').addEventListener('click', play);
+    document.getElementById('btnPause').addEventListener('click', pause);
+    document.getElementById('btnStop').addEventListener('click', stop);
+ 
+    initVLibras();
   </script>
-
+ 
 </body>
 </html>
